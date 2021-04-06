@@ -1,0 +1,30 @@
+﻿@model List<Operation>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Operations</h1>
+
+<hr />
+<table class="table">
+    <tr>
+        <th>Name</th>
+        <th>Actions</th>
+    </tr>
+    @foreach ( var op in Model )
+    {
+        <tr>
+            <td>@op.Name</td>
+            <td>@Html.ActionLink( "Edit", "Edit", "Operations", new { id = op.Id }, new { @class = "btn btn-default" } ) </td>
+            <td>@Html.ActionLink( "x", "Delete", "Operations", new { id = op.Id }, new { @class = "btn btn-danger btn-sm" } ) </td>
+        </tr>
+    }
+</table>
+@Html.ActionLink( "New", "Edit" )
+<div class="pull-right">@Html.ActionLink( "Export", "Export" )</div>
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync( "_ValidationScriptsPartial" );}
+}

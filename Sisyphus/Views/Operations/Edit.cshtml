@@ -1,0 +1,48 @@
+﻿@model Sisyphus.ViewModels.OperationViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<style>
+    textarea {
+        width:100%;
+        height:100px;
+    }
+</style>
+
+<h1>Operation @Model.Name</h1>
+<hr />
+
+<form asp-action="Save">
+    @Html.HiddenFor( o => o.Id )
+    <div class="form-group">
+        @Html.LabelFor( o => o.Name )
+        @Html.EditorFor( o => o.Name )
+    </div>
+    <div class="form-group">
+        @Html.LabelFor( o => o.ProviderId, "Provider" )
+        @Html.DropDownListFor( o => o.ProviderId, new SelectList( ViewBag.Providers, "Id", "Name" ) )
+    </div>
+    <div id="ProviderSettings">
+        @Html.EditorFor( o => o.SettingsObject )
+    </div>
+    <input type="submit" value="Save" class="btn btn-primary" />
+    <a href="/Operations" class="btn btn-link">Cancel</a>
+</form>
+
+@section Scripts {
+    <script>
+        $("#ProviderId").change(function () {
+            $.ajax({
+                url: '/Operations/Settings/' + $("#ProviderId").val(),
+                dataType: 'html',
+                success: function (data) {
+                    $('#ProviderSettings').html(data);
+                }
+            });
+        });
+    </script>
+
+    @{await Html.RenderPartialAsync( "_ValidationScriptsPartial" );}
+}

@@ -1,0 +1,19 @@
+﻿@model Sisyphus.Models.Bundle
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h1>Run</h1>
+
+<h3>Are you sure you want to run this?</h3>
+<div>
+    <h4>@Model.Name</h4>
+    <hr />
+       
+    <form asp-action="Run">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Run" class="btn btn-secondary" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

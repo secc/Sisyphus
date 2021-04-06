@@ -1,0 +1,12 @@
+*/.nuget/
+*/packages/
+*/bin/
+*/obj/
+*/Themes/**/*.css
+.vs
+.DS_Store
+prepros-6.config
+.system
+*appsettings*
+*/Properties/PublishProfiles/*
+*/Properties/ServiceDependencies/*

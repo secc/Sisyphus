@@ -1,0 +1,139 @@
+﻿@model Sisyphus.Models.Bundle
+
+@{
+    ViewData["Title"] = "Manage Operations";
+}
+
+<h1> @Html.DisplayFor( model => model.Name )</h1>
+
+<div>
+    <h4>@Html.DisplayFor( model => model.Description )</h4>
+
+    <hr />
+    <table class="table" id="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Operation</th>
+                <th>Provider</th>
+                <th>
+                    <a class="btn btn-primary btn-sm" data-toggle="modal" data-target="#newOpModal"><i class="fa fa-plus"></i></a>
+                </th>
+            </tr>
+        </thead>
+        <tbody id="table-body">
+            @foreach ( var bundleOperation in Model.BundleOperations.OrderBy( b => b.Order ) )
+            {
+                <tr class="table-row" data-id="@bundleOperation.Id">
+                    <td>
+                        <i class="fa fa-bars"></i>
+                    </td>
+                    <td>
+                        @Html.DisplayFor( m => bundleOperation.Operation.Name )
+                    </td>
+                    <td>
+                        @Html.DisplayFor( m => bundleOperation.Operation.Provider.Name )
+                    </td>
+                    <td>
+                        <a class="btn btn-danger btn-sm delete" data-id="@bundleOperation.Id"><i class="fa fa-times"></i></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<!-- Modal New -->
+<div class="modal fade" id="newOpModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form asp-action="AddOperation">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Add New Operation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    @Html.HiddenFor( m => m.Id )
+                    <div class="form-group">
+                        @Html.Label( "OperationId", "New Operation" )
+                        @Html.DropDownList( "OperationId", new SelectList( ViewBag.Operations, "Key", "Value" ), new { @class = "form-control" } )
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" value="Add Operation" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--Modal Remove Confirm-->
+<div class="modal fade" id="modalConfirm" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Confirm Remove</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you wish to remove this operation?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button id="btnConfirm" type="button" class="btn btn-danger">Remove Operation</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+    <script src='~/js/dragula.min.js'></script>
+    <script>
+        $(document).ready(function () {
+            var container = document.getElementById('table-body');
+
+            var sortableTable = dragula([container]);
+
+            sortableTable.on('drop', function (el, target, source, sibling) {
+                $.post(
+                    '/Bundles/MoveOperation',
+                    {
+                        'id': $(el).attr('data-id'),
+                        'siblingId': $(sibling).attr('data-id')
+                    }
+                );
+            })
+
+            $('.delete').click(function () {
+                $('#modalConfirm').attr('data-remove-for', $(this).attr('data-id'));
+                $('#modalConfirm').modal('show');
+            })
+
+            $('#btnConfirm').click(function () {
+                $('#btnConfirm').html('<i class="fas fa-sync fa-spin"></i> Removing...')
+                $.post(
+                    '/Bundles/RemoveOperation',
+                    {
+                        'id': $('#modalConfirm').attr('data-remove-for')
+                    },
+                    function () {
+                        $('.table-row[data-id="' + $('#modalConfirm').attr('data-remove-for') + '"]').remove();
+                        $('#btnConfirm').html('Remove Operation');
+                        $('#modalConfirm').modal('hide');
+                    }
+                );
+            })
+
+        });
+    </script>
+}
