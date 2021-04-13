@@ -7,6 +7,6 @@
 .DS_Store
 prepros-6.config
 .system
-*appsettings*
+*appsettings*json
 */Properties/PublishProfiles/*
 */Properties/ServiceDependencies/*
