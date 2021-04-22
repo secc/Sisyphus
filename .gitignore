@@ -10,3 +10,4 @@ prepros-6.config
 *appsettings*json
 */Properties/PublishProfiles/*
 */Properties/ServiceDependencies/*
+*.zip
