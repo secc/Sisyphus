@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -150,8 +150,27 @@ namespace Sisyphus.Controllers
         [Authorize( ClaimsPolicies.Administrator )]
         public IActionResult ExportAll()
         {
+            var operations = dataContext.Operations.ToList();
 
-            return Json( dataContext.Operations.ToList() );
+            System.IO.File.Delete( "export.zip" );
+
+            var zip = ZipFile.Open( "export.zip", ZipArchiveMode.Create );
+
+            foreach ( var op in operations )
+            {
+                var export = OperationExport.GetExport( op );
+                var output = JsonConvert.SerializeObject( export );
+
+                var fileName = op.Name.Replace( " ", "_" ) + ".json";
+                System.IO.File.WriteAllText( fileName, output );
+                zip.CreateEntryFromFile( fileName, fileName );
+                System.IO.File.Delete( fileName );
+            }
+
+            zip.Dispose();
+            var stream = System.IO.File.Open( "export.zip", FileMode.Open );
+
+            return File( stream, "application/zip", "export.zip" );
         }
     }
 }
