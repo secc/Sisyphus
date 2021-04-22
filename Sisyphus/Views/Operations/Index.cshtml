@@ -14,15 +14,17 @@
     </tr>
     @foreach ( var op in Model )
     {
-        <tr>
-            <td>@op.Name</td>
-            <td>@Html.ActionLink( "Edit", "Edit", "Operations", new { id = op.Id }, new { @class = "btn btn-default" } ) </td>
-            <td>@Html.ActionLink( "x", "Delete", "Operations", new { id = op.Id }, new { @class = "btn btn-danger btn-sm" } ) </td>
-        </tr>
+<tr>
+    <td>@op.Name</td>
+    <td>@Html.ActionLink( "Edit", "Edit", "Operations", new { id = op.Id }, new { @class = "btn btn-default" } ) </td>
+    <td>@Html.ActionLink( "Export", "Export", "Operations", new { id = op.Id }, new { @class = "btn btn-default" } ) </td>
+    <td>@Html.ActionLink( "x", "Delete", "Operations", new { id = op.Id }, new { @class = "btn btn-danger btn-sm" } ) </td>
+</tr>
     }
 </table>
-@Html.ActionLink( "New", "Edit" )
-<div class="pull-right">@Html.ActionLink( "Export", "Export" )</div>
+<a asp-action="Edit" class="btn btn-outline-primary">New</a>
+<a asp-action="Import" class="btn btn-outline-primary">Import</a>
+<a asp-action="ExportAll" class="btn btn-outline-primary">Export All</a>
 
 
 @section Scripts {

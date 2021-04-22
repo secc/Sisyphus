@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -29,6 +32,7 @@ namespace Sisyphus.Controllers
             return View( dataContext.Operations.ToList() );
         }
 
+        [Authorize( ClaimsPolicies.Administrator )]
         public IActionResult Edit( Guid id )
         {
             var operation = dataContext.Operations.Where( o => o.Id == id ).FirstOrDefault();
@@ -53,7 +57,22 @@ namespace Sisyphus.Controllers
             return View( operationVM );
         }
 
+        [Authorize( ClaimsPolicies.Administrator )]
+        public IActionResult Export( Guid id )
+        {
+            var op = dataContext.Operations.Where( o => o.Id == id ).FirstOrDefault();
+            var export = OperationExport.GetExport( op );
+            var output = JsonConvert.SerializeObject( export );
 
+            var stream = new MemoryStream();
+            var writer = new StreamWriter( stream );
+            writer.Write( output );
+            writer.Flush();
+            stream.Position = 0;
+            return File( stream, "application/json", op.Name.Replace( " ", "_" ) + ".json" );
+        }
+
+        [Authorize( ClaimsPolicies.Administrator )]
         public IActionResult Settings( Guid id )
         {
             var provider = dataContext.Providers.Where( p => p.Id == id ).FirstOrDefault();
@@ -74,6 +93,7 @@ namespace Sisyphus.Controllers
             return Redirect( "/Operations" );
         }
 
+        [Authorize( ClaimsPolicies.Administrator )]
         public async Task<IActionResult> Delete( Guid? id )
         {
             if ( id == null )
@@ -106,7 +126,29 @@ namespace Sisyphus.Controllers
             return RedirectToAction( nameof( Index ) );
         }
 
-        public IActionResult Export()
+        [Authorize( ClaimsPolicies.Administrator )]
+        public IActionResult Import()
+        {
+            return View();
+        }
+
+        [Authorize( ClaimsPolicies.Administrator )]
+        [HttpPost]
+        public IActionResult Import( FileUpload fileUpload )
+        {
+            var file = fileUpload.FormFile;
+            using ( var stream = file.OpenReadStream() )
+            {
+                StreamReader reader = new StreamReader( stream );
+                string export = reader.ReadToEnd();
+                var operation = OperationExport.Import( export );
+                return RedirectToAction( "Edit", new { id = operation.Id } );
+            }
+        }
+
+
+        [Authorize( ClaimsPolicies.Administrator )]
+        public IActionResult ExportAll()
         {
 
             return Json( dataContext.Operations.ToList() );
